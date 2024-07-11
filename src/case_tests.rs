@@ -9,7 +9,7 @@ pub mod case1 {
         pub expected_tell2: u64,
     }
 
-    pub fn new() -> Case<'static> {
+    pub fn new() -> Case<'a> {
         // impl Case<'_> {
         //     pub fn new() -> Self {
         let acm = Case {
