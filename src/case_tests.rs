@@ -9,9 +9,9 @@ pub mod case1 {
         pub expected_tell2: u64,
     }
 
-    pub fn new() -> Case<'a> {
-        // impl Case<'_> {
-        //     pub fn new() -> Self {
+    // pub fn new() -> Case<'a> {
+        impl Case<'_> {
+            pub fn new() -> Self {
         let acm = Case {
             file: Cursor::new(
                 r"
@@ -125,6 +125,6 @@ keywords = {scada, power grid, network characterization}
             expected_tell2: 1133,
         };
         acm
-        // }
+        }
     }
 }

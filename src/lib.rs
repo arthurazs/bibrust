@@ -78,11 +78,11 @@ mod tests {
     use crate::next_entry;
     use crate::Teller;
     use std::io::Cursor;
-    use crate::case_tests::case1;
+    use crate::case_tests::case1::Case;
 
     #[test]
     fn it_works() {
-        let mut case = case1::new();
+        let mut case = Case::new();
 
         let mut entry: Cursor<Vec<u8>> = next_entry(&mut case.file);
         assert_eq!(entry.tell(), 0);
