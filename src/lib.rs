@@ -36,47 +36,45 @@ pub fn parse_file(file_path: PathBuf) {
     log::info!("Got next entry!");
 }
 
-pub trait Teller {
-    fn tell(&mut self) -> u64;
-    fn remaining_contents(&mut self) -> bool;
-}
-
-macro_rules! impl_Teller {
-    (for $($t:ty),+) => {
-        $(impl Teller for Cursor<$t> {
-            fn tell(&mut self) -> u64 {
-                self.seek(SeekFrom::Current(0)).unwrap()
-            }
-
-            fn remaining_contents(&mut self) -> bool {
-                // '\t', '\n', '\r', ' '
-                let empty_chars: Vec<u8> = Vec::from([9, 10, 13, 32]);
-                let cookie = self.tell();
-                let mut empty: bool = true;
-                let mut buffer: [u8; 1] = [0; 1];
-
-                while self.read(&mut buffer).unwrap() != 0 {
-                    if !empty_chars.contains(&buffer[0]) {
-                        empty = false;
-                        break;
-                    }
-                }
-
-                self.seek(SeekFrom::Start(cookie)).unwrap();
-                return !empty;
-            }
-        })*
-    };
-}
-impl_Teller!(for Vec<u8>, String);
-
 mod case_tests;
 #[cfg(test)]
 mod tests {
     use crate::case_tests::case1::Case;
     use crate::next_entry;
-    use crate::Teller;
     use std::io::Cursor;
+    use std::io::{Read, Seek, SeekFrom};
+    const EMPTY_CHARS: [u8; 4] = [b'\t', b'\n', b'\r', b' '];
+
+    trait Teller {
+        fn tell(&mut self) -> u64;
+        fn remaining_contents(&mut self) -> bool;
+    }
+    macro_rules! impl_Teller {
+        (for $($t:ty),+) => {
+            $(impl Teller for Cursor<$t> {
+                fn tell(&mut self) -> u64 {
+                    self.seek(SeekFrom::Current(0)).unwrap()
+                }
+
+                fn remaining_contents(&mut self) -> bool {
+                    let cookie = self.tell();
+                    let mut empty: bool = true;
+                    let mut buffer: [u8; 1] = [0; 1];
+
+                    while self.read(&mut buffer).unwrap() != 0 {
+                        if !EMPTY_CHARS.contains(&buffer[0]) {
+                            empty = false;
+                            break;
+                        }
+                    }
+
+                    self.seek(SeekFrom::Start(cookie)).unwrap();
+                    return !empty;
+                }
+            })*
+        };
+    }
+    impl_Teller!(for Vec<u8>, String);
 
     #[test]
     fn next_entry_cases() {
