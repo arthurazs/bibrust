@@ -30,7 +30,6 @@ pub fn next_entry<R: Read>(bib: &mut R) -> Cursor<Vec<u8>> {
 pub fn parse_file(file_path: PathBuf) {
     log::info!("Parsing {}...", file_path.display());
     let mut bib: File = File::open(file_path).unwrap();
-    // next_entry(&bib);
     let mut entry: Cursor<Vec<u8>> = next_entry(&mut bib);
     let mut buffer: String = String::new();
     entry.read_to_string(&mut buffer).unwrap();
