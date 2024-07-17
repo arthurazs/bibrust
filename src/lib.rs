@@ -27,6 +27,23 @@ pub fn next_entry<R: Read>(bib: &mut R) -> Cursor<Vec<u8>> {
     entry
 }
 
+fn get_category(entry: &mut Cursor<Vec<u8>>) -> String {
+    let mut buffer: [u8; 1] = [0; 1];
+    let mut category = String::new();
+    let mut found_at = false;
+    while entry.read(&mut buffer).unwrap() != 0 {
+        if !found_at {
+            found_at = buffer[0] == b'@';
+            continue;
+        }
+        if buffer[0] == b'{' {
+            break;
+        }
+        category.push(buffer[0] as char);
+    }
+    category.to_lowercase()
+}
+
 pub fn parse_file(file_path: PathBuf) {
     log::info!("Parsing {}...", file_path.display());
     let mut bib: File = File::open(file_path).unwrap();
