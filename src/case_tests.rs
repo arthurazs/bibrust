@@ -1,5 +1,6 @@
 #[cfg(test)]
-pub mod case1 {
+pub mod cases {
+    const EXPECTED_CATEGORY: &str = "article";
     const ACM_TEXT: &str = r"
 @article{1,
 author = {Ahmad, Waqar and Hasan, Osman and Tahar, Sofi\`{e}ne},
@@ -142,7 +143,7 @@ EXPORT DATE: 02 July 2024
 ";
 
     use std::io::Cursor;
-    pub struct Case {
+    pub struct ExpectedNextEntry {
         pub file: Cursor<String>,
         pub expected_entry1: Cursor<Vec<u8>>,
         pub expected_tell1: u64,
@@ -154,9 +155,9 @@ EXPORT DATE: 02 July 2024
         pub expected_tell4: u64,
     }
 
-    impl Case {
+    impl ExpectedNextEntry {
         pub fn new() -> [Self; 4] {
-            let acm = Case {
+            let acm = ExpectedNextEntry {
                 file: Cursor::new(String::from(ACM_TEXT)),
                 expected_entry1: Cursor::new(Vec::from(&ACM_TEXT[..623])),
                 expected_tell1: 623,
@@ -168,7 +169,7 @@ EXPORT DATE: 02 July 2024
                 expected_tell4: 1134,
             };
 
-            let ieee = Case {
+            let ieee = ExpectedNextEntry {
                 file: Cursor::new(String::from(IEEE_TEXT)),
                 expected_entry1: Cursor::new(Vec::from(&IEEE_TEXT[..357])),
                 expected_tell1: 357,
@@ -180,7 +181,7 @@ EXPORT DATE: 02 July 2024
                 expected_tell4: 739,
             };
 
-            let science_directory = Case {
+            let science_directory = ExpectedNextEntry {
                 file: Cursor::new(String::from(SCI_DIR_TEXT)),
                 expected_entry1: Cursor::new(Vec::from(&SCI_DIR_TEXT[..542])),
                 expected_tell1: 542,
@@ -192,7 +193,7 @@ EXPORT DATE: 02 July 2024
                 expected_tell4: 1114,
             };
 
-            let scopus = Case {
+            let scopus = ExpectedNextEntry {
                 file: Cursor::new(String::from(SCOPUS_TEXT)),
                 expected_entry1: Cursor::new(Vec::<u8>::from(&SCOPUS_TEXT[..1275])),
                 expected_tell1: 1275,
@@ -202,6 +203,39 @@ EXPORT DATE: 02 July 2024
                 expected_tell3: 2943,
                 expected_entry4: Cursor::new(Vec::<u8>::from(&SCOPUS_TEXT[2943..])),
                 expected_tell4: 2943,
+            };
+
+            [acm, ieee, science_directory, scopus]
+        }
+    }
+
+    pub struct ExpectedGetCategory {
+        pub entry: Cursor<Vec<u8>>,
+        pub tell: u64,
+        pub category: String,
+    }
+
+    impl ExpectedGetCategory {
+        pub fn new() -> [Self; 4] {
+            let acm = ExpectedGetCategory {
+                entry: Cursor::new(Vec::from(&ACM_TEXT[..623])),
+                tell: 10,
+                category: EXPECTED_CATEGORY.to_string(),
+            };
+            let ieee = ExpectedGetCategory {
+                entry: Cursor::new(Vec::from(&IEEE_TEXT[..357])),
+                tell: 10,
+                category: EXPECTED_CATEGORY.to_string(),
+            };
+            let science_directory = ExpectedGetCategory {
+                entry: Cursor::new(Vec::from(&SCI_DIR_TEXT[..542])),
+                tell: 10,
+                category: EXPECTED_CATEGORY.to_string(),
+            };
+                let scopus = ExpectedGetCategory {
+                entry: Cursor::new(Vec::<u8>::from(&SCOPUS_TEXT[..1275])),
+                tell: 44,
+                category: EXPECTED_CATEGORY.to_string(),
             };
             [acm, ieee, science_directory, scopus]
         }

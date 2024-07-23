@@ -27,7 +27,7 @@ pub fn next_entry<R: Read>(bib: &mut R) -> Cursor<Vec<u8>> {
     entry
 }
 
-fn get_category(entry: &mut Cursor<Vec<u8>>) -> String {
+pub fn get_category(entry: &mut Cursor<Vec<u8>>) -> String {
     let mut buffer: [u8; 1] = [0; 1];
     let mut category = String::new();
     let mut found_at = false;
@@ -56,8 +56,8 @@ pub fn parse_file(file_path: PathBuf) {
 mod case_tests;
 #[cfg(test)]
 mod tests {
-    use crate::case_tests::case1::Case;
-    use crate::next_entry;
+    use crate::case_tests::cases::{ExpectedGetCategory, ExpectedNextEntry};
+    use crate::{get_category, next_entry};
     use std::io::Cursor;
     use std::io::{Read, Seek, SeekFrom};
     const EMPTY_CHARS: [u8; 4] = [b'\t', b'\n', b'\r', b' '];
@@ -95,7 +95,7 @@ mod tests {
 
     #[test]
     fn next_entry_cases() {
-        for mut case in Case::new() {
+        for mut case in ExpectedNextEntry::new() {
             let mut entry: Cursor<Vec<u8>> = next_entry(&mut case.file);
             assert_eq!(entry.tell(), 0);
             assert!(entry.remaining_contents());
@@ -119,6 +119,15 @@ mod tests {
             assert!(!entry.remaining_contents());
             assert_eq!(entry, case.expected_entry4);
             assert_eq!(case.file.tell(), case.expected_tell4);
+        }
+    }
+
+    #[test]
+    fn get_category_cases() {
+        for mut expected in ExpectedGetCategory::new() {
+            let category: String = get_category(&mut expected.entry);
+            assert_eq!(category, expected.category);
+            assert_eq!(expected.entry.tell(), expected.tell)
         }
     }
 }
