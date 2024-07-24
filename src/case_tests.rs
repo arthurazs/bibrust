@@ -1,6 +1,7 @@
 #[cfg(test)]
 pub mod cases {
     const EXPECTED_CATEGORY: &str = "article";
+    const EXPECTED_KEY: &str = "1";
     const ACM_TEXT: &str = r"
 @article{1,
 author = {Ahmad, Waqar and Hasan, Osman and Tahar, Sofi\`{e}ne},
@@ -154,7 +155,6 @@ EXPORT DATE: 02 July 2024
         pub expected_entry4: Cursor<Vec<u8>>,
         pub expected_tell4: u64,
     }
-
     impl ExpectedNextEntry {
         pub fn new() -> [Self; 4] {
             let acm = ExpectedNextEntry {
@@ -214,7 +214,6 @@ EXPORT DATE: 02 July 2024
         pub tell: u64,
         pub category: String,
     }
-
     impl ExpectedGetCategory {
         pub fn new() -> [Self; 4] {
             let acm = ExpectedGetCategory {
@@ -232,10 +231,52 @@ EXPORT DATE: 02 July 2024
                 tell: 10,
                 category: EXPECTED_CATEGORY.to_string(),
             };
-                let scopus = ExpectedGetCategory {
+            let scopus = ExpectedGetCategory {
                 entry: Cursor::new(Vec::<u8>::from(&SCOPUS_TEXT[..1275])),
                 tell: 44,
                 category: EXPECTED_CATEGORY.to_string(),
+            };
+            [acm, ieee, science_directory, scopus]
+        }
+    }
+
+    pub struct ExpectedGetKey {
+        pub key: String,
+        pub tell: u64,
+    }
+    pub struct CaseGetKey {
+        pub entry: Cursor<Vec<u8>>,
+        pub expected: ExpectedGetKey,
+    }
+    impl CaseGetKey {
+        pub fn new() -> [Self; 4] {
+            let acm = CaseGetKey {
+                entry: Cursor::new(Vec::from(&ACM_TEXT[..623])),
+                expected: ExpectedGetKey {
+                    key: EXPECTED_KEY.to_string(),
+                    tell: 12,
+                },
+            };
+            let ieee = CaseGetKey {
+                entry: Cursor::new(Vec::from(&IEEE_TEXT[..357])),
+                expected: ExpectedGetKey {
+                    tell: 12,
+                    key: EXPECTED_KEY.to_string(),
+                },
+            };
+            let science_directory = CaseGetKey {
+                entry: Cursor::new(Vec::from(&SCI_DIR_TEXT[..542])),
+                expected: ExpectedGetKey {
+                    tell: 12,
+                    key: EXPECTED_KEY.to_string(),
+                },
+            };
+            let scopus = CaseGetKey {
+                entry: Cursor::new(Vec::<u8>::from(&SCOPUS_TEXT[..1275])),
+                expected: ExpectedGetKey {
+                    tell: 46,
+                    key: EXPECTED_KEY.to_string(),
+                },
             };
             [acm, ieee, science_directory, scopus]
         }
