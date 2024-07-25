@@ -1,5 +1,9 @@
 use std::io::{Cursor, Read, Seek, SeekFrom, Write};
 use std::{fs::File, path::PathBuf};
+pub struct Element {
+    pub key: String,
+    pub value: String,
+}
 
 pub fn next_entry<R: Read>(bib: &mut R) -> Cursor<Vec<u8>> {
     let mut buffer: [u8; 1] = [0; 1];
@@ -96,6 +100,13 @@ fn get_element_value(entry: &mut Cursor<Vec<u8>>) -> String {
     element_key.trim().to_string()
 }
 
+pub fn get_next_element(entry: &mut Cursor<Vec<u8>>) -> Element {
+    Element {
+        key: get_element_key(entry),
+        value: get_element_value(entry),
+    }
+}
+
 pub fn parse_file(file_path: PathBuf) {
     log::info!("Parsing {}...", file_path.display());
     let mut bib: File = File::open(file_path).unwrap();
@@ -109,9 +120,13 @@ mod case_tests;
 #[cfg(test)]
 mod tests {
     use crate::case_tests::cases::{
-        CaseGetElementKey, CaseGetElementValue, CaseGetKey, ExpectedGetCategory, ExpectedNextEntry,
+        CaseGetElementKey, CaseGetElementValue, CaseGetKey, CaseGetNextElement,
+        ExpectedGetCategory, ExpectedNextEntry,
     };
-    use crate::{get_category, get_element_key, get_element_value, get_key, next_entry};
+    use crate::{
+        get_category, get_element_key, get_element_value, get_key, get_next_element, next_entry,
+        Element,
+    };
     use std::io::Cursor;
     use std::io::{Read, Seek, SeekFrom};
     const EMPTY_CHARS: [u8; 4] = [b'\t', b'\n', b'\r', b' '];
@@ -214,6 +229,18 @@ mod tests {
             get_element_key(&mut case.entry);
             let element_value = get_element_value(&mut case.entry);
             assert_eq!(element_value, case.expected.value);
+            assert_eq!(case.entry.tell(), case.expected.tell);
+        }
+    }
+
+    #[test]
+    fn get_next_element_cases() {
+        for mut case in CaseGetNextElement::new() {
+            get_category(&mut case.entry);
+            get_key(&mut case.entry);
+            let Element { key, value } = get_next_element(&mut case.entry);
+            assert_eq!(key, case.expected.key);
+            assert_eq!(value, case.expected.value);
             assert_eq!(case.entry.tell(), case.expected.tell);
         }
     }
