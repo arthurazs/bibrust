@@ -68,6 +68,34 @@ fn get_element_key(entry: &mut Cursor<Vec<u8>>) -> String {
     element_key.trim().to_lowercase()
 }
 
+fn get_element_value(entry: &mut Cursor<Vec<u8>>) -> String {
+    let mut buffer: [u8; 1] = [0; 1];
+    let mut element_key = String::new();
+    let mut started: bool = false;
+    let mut counter: usize = 0;
+
+    while entry.read(&mut buffer).unwrap() != 0 {
+        let open: bool = buffer[0] == b'{';
+        if !started {
+            if open {
+                started = true;
+                counter += 1;
+            }
+            continue;
+        }
+        let close: bool = buffer[0] == b'}';
+
+        counter += open as usize;
+        counter -= close as usize;
+
+        if started && counter == 0 {
+            break;
+        }
+        element_key.push(buffer[0] as char);
+    }
+    element_key.trim().to_string()
+}
+
 pub fn parse_file(file_path: PathBuf) {
     log::info!("Parsing {}...", file_path.display());
     let mut bib: File = File::open(file_path).unwrap();
@@ -178,4 +206,15 @@ mod tests {
         }
     }
 
+    #[test]
+    fn get_element_value_cases() {
+        for mut case in CaseGetElementValue::new() {
+            get_category(&mut case.entry);
+            get_key(&mut case.entry);
+            get_element_key(&mut case.entry);
+            let element_value = get_element_value(&mut case.entry);
+            assert_eq!(element_value, case.expected.value);
+            assert_eq!(case.entry.tell(), case.expected.tell);
+        }
+    }
 }

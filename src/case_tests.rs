@@ -317,4 +317,41 @@ EXPORT DATE: 02 July 2024
         }
     }
 
+    pub struct CaseGetElementValue {
+        pub entry: Cursor<Vec<u8>>,
+        pub expected: ExpectedValue,
+    }
+    impl CaseGetElementValue {
+        pub fn new() -> [Self; 4] {
+            let acm = CaseGetElementValue {
+                entry: Cursor::new(Vec::from(&ACM_TEXT[..623])),
+                expected: ExpectedValue {
+                    value: String::from(r"Ahmad, Waqar and Hasan, Osman and Tahar, Sofi\`{e}ne"),
+                    tell: 76,
+                },
+            };
+            let ieee = CaseGetElementValue {
+                entry: Cursor::new(Vec::from(&IEEE_TEXT[..357])),
+                expected: ExpectedValue {
+                    value: String::from("Wang, Wenlong and Liu, Minghui and Zhao, Xicai and Yang, Gui"),
+                    tell: 84,
+                },
+            };
+            let science_directory = CaseGetElementValue {
+                entry: Cursor::new(Vec::from(&SCI_DIR_TEXT[..542])),
+                expected: ExpectedValue {
+                    value: String::from("Research and implementation of virtual circuit test tool for smart substations"),
+                    tell: 101,
+                },
+            };
+            let scopus = CaseGetElementValue {
+                entry: Cursor::new(Vec::<u8>::from(&SCOPUS_TEXT[..1275])),
+                expected: ExpectedValue {
+                    value: String::from("Chamana, Manohar and Bhatta, Rabindra and Schmitt, Konrad and Shrestha, Rajendra and Bayne, Stephen"),
+                    tell: 158,
+                },
+            };
+            [acm, ieee, science_directory, scopus]
+        }
+    }
 }
