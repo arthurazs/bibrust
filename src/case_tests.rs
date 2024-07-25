@@ -279,4 +279,42 @@ EXPORT DATE: 02 July 2024
         }
     }
 
+    pub struct CaseGetElementKey {
+        pub entry: Cursor<Vec<u8>>,
+        pub expected: ExpectedValue,
+    }
+    impl CaseGetElementKey {
+        pub fn new() -> [Self; 4] {
+            let acm = CaseGetElementKey {
+                entry: Cursor::new(Vec::from(&ACM_TEXT[..623])),
+                expected: ExpectedValue {
+                    value: String::from("author"),
+                    tell: 21,
+                },
+            };
+            let ieee = CaseGetElementKey {
+                entry: Cursor::new(Vec::from(&IEEE_TEXT[..357])),
+                expected: ExpectedValue {
+                    value: String::from("author"),
+                    tell: 22,
+                },
+            };
+            let science_directory = CaseGetElementKey {
+                entry: Cursor::new(Vec::from(&SCI_DIR_TEXT[..542])),
+                expected: ExpectedValue {
+                    value: String::from("title"),
+                    tell: 20,
+                },
+            };
+            let scopus = CaseGetElementKey {
+                entry: Cursor::new(Vec::<u8>::from(&SCOPUS_TEXT[..1275])),
+                expected: ExpectedValue {
+                    value: String::from("author"),
+                    tell: 56,
+                },
+            };
+            [acm, ieee, science_directory, scopus]
+        }
+    }
+
 }
