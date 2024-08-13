@@ -244,4 +244,17 @@ mod tests {
             assert_eq!(case.entry.tell(), case.expected.tell);
         }
     }
+
+    #[test]
+    fn get_next_element_twice_cases() {
+        for mut case in CaseGetNextElement::new_twice() {
+            get_category(&mut case.entry);
+            get_key(&mut case.entry);
+            get_next_element(&mut case.entry);
+            let Element { key, value } = get_next_element(&mut case.entry);
+            assert_eq!(key, case.expected.key);
+            assert_eq!(value, case.expected.value);
+            assert_eq!(case.entry.tell(), case.expected.tell);
+        }
+    }
 }

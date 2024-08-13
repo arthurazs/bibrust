@@ -404,5 +404,43 @@ EXPORT DATE: 02 July 2024
             };
             [acm, ieee, science_directory, scopus]
         }
+        pub fn new_twice() -> [Self; 1] {
+            let acm = CaseGetNextElement {
+                entry: Cursor::new(Vec::from(&ACM_TEXT[..623])),
+                expected: ExpectedElement {
+                    key: String::from("title"),
+                    value: String::from("Formal reliability and failure analysis of ethernet based communication networks in a smart grid substation"),
+                    tell: 195,
+                },
+            };
+            //let ieee = CaseGetNextElement {
+            //    entry: Cursor::new(Vec::from(&IEEE_TEXT[..357])),
+            //    expected: ExpectedElement {
+            //        key: String::from("author"),
+            //        value: String::from(
+            //            "Wang, Wenlong and Liu, Minghui and Zhao, Xicai and Yang, Gui",
+            //        ),
+            //        tell: 84,
+            //    },
+            //};
+            //let science_directory = CaseGetNextElement {
+            //    entry: Cursor::new(Vec::from(&SCI_DIR_TEXT[..542])),
+            //    expected: ExpectedElement {
+            //        key: String::from("title"),
+            //        value: String::from("Research and implementation of virtual circuit test tool for smart substations"),
+            //        tell: 101,
+            //    },
+            //};
+            //let scopus = CaseGetNextElement {
+            //    entry: Cursor::new(Vec::<u8>::from(&SCOPUS_TEXT[..1275])),
+            //    expected: ExpectedElement {
+            //        key: String::from("author"),
+            //        value: String::from("Chamana, Manohar and Bhatta, Rabindra and Schmitt, Konrad and Shrestha, Rajendra and Bayne, Stephen"),
+            //        tell: 158,
+            //    },
+            //};
+            //[acm, ieee, science_directory, scopus]
+            [acm]
+        }
     }
 }
