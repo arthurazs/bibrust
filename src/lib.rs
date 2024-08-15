@@ -69,7 +69,7 @@ fn get_element_key(entry: &mut Cursor<Vec<u8>>) -> String {
         }
         element_key.push(buffer[0] as char);
     }
-    element_key.trim().to_lowercase()
+    element_key.strip_prefix(",").unwrap_or(&element_key).trim().to_lowercase()
 }
 
 fn get_element_value(entry: &mut Cursor<Vec<u8>>) -> String {
