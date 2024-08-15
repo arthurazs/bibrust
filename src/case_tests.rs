@@ -404,7 +404,7 @@ EXPORT DATE: 02 July 2024
             };
             [acm, ieee, science_directory, scopus]
         }
-        pub fn new_twice() -> [Self; 1] {
+        pub fn new_twice() -> [Self; 4] {
             let acm = CaseGetNextElement {
                 entry: Cursor::new(Vec::from(&ACM_TEXT[..623])),
                 expected: ExpectedElement {
@@ -413,34 +413,31 @@ EXPORT DATE: 02 July 2024
                     tell: 195,
                 },
             };
-            //let ieee = CaseGetNextElement {
-            //    entry: Cursor::new(Vec::from(&IEEE_TEXT[..357])),
-            //    expected: ExpectedElement {
-            //        key: String::from("author"),
-            //        value: String::from(
-            //            "Wang, Wenlong and Liu, Minghui and Zhao, Xicai and Yang, Gui",
-            //        ),
-            //        tell: 84,
-            //    },
-            //};
-            //let science_directory = CaseGetNextElement {
-            //    entry: Cursor::new(Vec::from(&SCI_DIR_TEXT[..542])),
-            //    expected: ExpectedElement {
-            //        key: String::from("title"),
-            //        value: String::from("Research and implementation of virtual circuit test tool for smart substations"),
-            //        tell: 101,
-            //    },
-            //};
-            //let scopus = CaseGetNextElement {
-            //    entry: Cursor::new(Vec::<u8>::from(&SCOPUS_TEXT[..1275])),
-            //    expected: ExpectedElement {
-            //        key: String::from("author"),
-            //        value: String::from("Chamana, Manohar and Bhatta, Rabindra and Schmitt, Konrad and Shrestha, Rajendra and Bayne, Stephen"),
-            //        tell: 158,
-            //    },
-            //};
-            //[acm, ieee, science_directory, scopus]
-            [acm]
+            let ieee = CaseGetNextElement {
+                entry: Cursor::new(Vec::from(&IEEE_TEXT[..357])),
+                expected: ExpectedElement {
+                    key: String::from("journal"),
+                    value: String::from("Journal of Modern Power Systems and Clean Energy"),
+                    tell: 146,
+                },
+            };
+            let science_directory = CaseGetNextElement {
+                entry: Cursor::new(Vec::from(&SCI_DIR_TEXT[..542])),
+                expected: ExpectedElement {
+                    key: String::from("journal"),
+                    value: String::from("Procedia Computer Science"),
+                    tell: 140,
+                },
+            };
+            let scopus = CaseGetNextElement {
+                entry: Cursor::new(Vec::<u8>::from(&SCOPUS_TEXT[..1275])),
+                expected: ExpectedElement {
+                    key: String::from("title"),
+                    value: String::from("An Integrated Testbed for Power System Cyber-Physical Operations Training"),
+                    tell: 244,
+                },
+            };
+            [acm, ieee, science_directory, scopus]
         }
     }
 }
