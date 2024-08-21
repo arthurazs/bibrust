@@ -1,8 +1,17 @@
 use std::io::{Cursor, Read, Seek, SeekFrom, Write};
 use std::{fs::File, path::PathBuf};
+
+#[derive(Debug)]
 pub struct Element {
     pub key: String,
     pub value: String,
+}
+
+#[derive(Debug)]
+pub struct Entry {
+    pub category: String,
+    pub key: String,
+    pub elements: Vec<Element>,
 }
 
 pub fn next_entry<R: Read>(bib: &mut R) -> Cursor<Vec<u8>> {
@@ -69,7 +78,11 @@ fn get_element_key(entry: &mut Cursor<Vec<u8>>) -> String {
         }
         element_key.push(buffer[0] as char);
     }
-    element_key.strip_prefix(",").unwrap_or(&element_key).trim().to_lowercase()
+    element_key
+        .strip_prefix(",")
+        .unwrap_or(&element_key)
+        .trim()
+        .to_lowercase()
 }
 
 fn get_element_value(entry: &mut Cursor<Vec<u8>>) -> String {
@@ -107,13 +120,34 @@ pub fn get_next_element(entry: &mut Cursor<Vec<u8>>) -> Element {
     }
 }
 
+pub fn parse_entry(entry: &mut Cursor<Vec<u8>>) -> Entry {
+    let category: String = get_category(entry);
+    log::info!("Category: {:?}", category);
+    let key: String = get_key(entry);
+    let mut elements: Vec<Element> = Vec::new();
+    loop {
+        let element: Element = get_next_element(entry);
+        elements.push(element);
+        break;
+    }
+    return Entry {
+        category,
+        key,
+        elements,
+    };
+}
+
 pub fn parse_file(file_path: PathBuf) {
     log::info!("Parsing {}...", file_path.display());
     let mut bib: File = File::open(file_path).unwrap();
-    let mut entry: Cursor<Vec<u8>> = next_entry(&mut bib);
+    let mut raw_entry: Cursor<Vec<u8>> = next_entry(&mut bib);
     let mut buffer: String = String::new();
-    entry.read_to_string(&mut buffer).unwrap();
-    log::info!("Got next entry!");
+    raw_entry.read_to_string(&mut buffer).unwrap();
+    log::info!("Got first entry!");
+    parse_entry(&mut raw_entry);
+    //let entry: Entry = parse_entry(&mut raw_entry);
+    //log::info!("Got entry!");
+    //println!("{:?}", entry);
 }
 
 mod case_tests;
@@ -257,4 +291,13 @@ mod tests {
             assert_eq!(case.entry.tell(), case.expected.tell);
         }
     }
+
+    //#[test]
+    //fn parse_entry_cases() {
+    //    for mut case in CaseParseEntry::new() {
+    //        let entry = parse_entry(&mut case.entry);
+    //        assert_eq!(entry, case.expected);
+    //        assert_eq!(case.entry.tell(), case.expected.tell);
+    //    }
+    //}
 }
