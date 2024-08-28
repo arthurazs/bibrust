@@ -28,7 +28,7 @@ The parsed files will be placed at `data/output/`.
 
 ## Quickstart
 
-Tested on Ubuntu 22.04.4 LTS with rustc 1.80.1.
+Tested on Ubuntu 22.04.1 LTS with rustc 1.80.1.
 
 ```bash
 git clone https://github.com/arthurazs/bibrust
