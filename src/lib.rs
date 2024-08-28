@@ -7,11 +7,74 @@ pub struct Element {
     pub value: String,
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub struct Entry {
     pub category: String,
     pub key: String,
-    pub elements: Vec<Element>,
+    pub author: Vec<String>,
+    //pub r#abstract: String,
+    pub title: String,
+    pub journal: String,
+    pub year: u16,
+    pub keywords: Vec<String>,
+    pub volume: String,
+    pub number: String,
+    pub pages: String,
+    pub doi: String,
+    pub issn: String,
+    pub month: String,
+    pub issue_date: String,
+    pub publisher: String,
+    pub address: String,
+    pub url: String,
+    pub numpages: u16,
+    pub articleno: u16,
+    pub note: String,
+    pub affiliations: Vec<String>,
+    pub author_keywords: Vec<String>,
+    pub correspondence_address: Vec<String>,
+    pub language: String,
+    pub abbrev_source_title: String,
+    pub publication_stage: String,
+    pub source: String,
+    pub coden: String,
+    pub pmid: u16,
+}
+impl Entry {
+    fn new(category: String, key: String) -> Entry {
+        Entry {
+            category,
+            key,
+            author: Vec::<String>::new(),
+            //r#abstract: String::new(),
+            title: String::new(),
+            journal: String::new(),
+            year: 0,
+            keywords: Vec::<String>::new(),
+            volume: String::new(),
+            number: String::new(),
+            pages: String::new(),
+            doi: String::new(),
+            issn: String::new(),
+            month: String::new(),
+            issue_date: String::new(),
+            publisher: String::new(),
+            address: String::new(),
+            url: String::new(),
+            numpages: 0,
+            articleno: 0,
+            note: String::new(),
+            affiliations: Vec::<String>::new(),
+            author_keywords: Vec::<String>::new(),
+            correspondence_address: Vec::<String>::new(),
+            language: String::new(),
+            abbrev_source_title: String::new(),
+            publication_stage: String::new(),
+            source: String::new(),
+            coden: String::new(),
+            pmid: 0,
+        }
+    }
 }
 
 pub fn next_entry<R: Read>(bib: &mut R) -> Cursor<Vec<u8>> {
@@ -23,8 +86,8 @@ pub fn next_entry<R: Read>(bib: &mut R) -> Cursor<Vec<u8>> {
     while bib.read(&mut buffer).unwrap() != 0 {
         entry.write_all(&buffer).unwrap();
 
-        let open: bool = buffer[0] == 0x7b;
-        let close: bool = buffer[0] == 0x7d;
+        let open: bool = buffer[0] == b'{';
+        let close: bool = buffer[0] == b'}';
         if !found {
             found = open;
         }
@@ -120,50 +183,144 @@ pub fn get_next_element(entry: &mut Cursor<Vec<u8>>) -> Element {
     }
 }
 
+fn parse_int_element(element: Element) -> u16 {
+    match element.value.parse::<u16>() {
+        Ok(parsed) => parsed,
+        Err(reason) => {
+            log::warn!("Could not parse invalid {} {} [{reason}]", element.key, element.value);
+            0
+        }
+    }
+}
+
 pub fn parse_entry(entry: &mut Cursor<Vec<u8>>) -> Entry {
     let category: String = get_category(entry);
-    log::info!("Category: {:?}", category);
     let key: String = get_key(entry);
-    let mut elements: Vec<Element> = Vec::new();
+    let mut parsed_entry = Entry::new(category.clone(), key);
     loop {
         let element: Element = get_next_element(entry);
-        elements.push(element);
-        break;
+        if element.key == "}" || element.key == "" {
+            break;
+        }
+        // TODO @arthurazs: parse missing elements: abstract, author, keywords, affiliations,
+        // author_keywords, correspondence_address
+        match element.key.as_str() {
+            "author" | "keywords" | "affiliations" | "author_keywords" | "correspondence_address" => {
+                //parsed_entry.author = element.value;
+                log::warn!("this type of parsing is not implemented yet...")
+            }
+            //"abstract" => {
+            //    parsed_entry.r#abstract = element.value;
+            //}
+            "title" => {
+                parsed_entry.title = element.value;
+            }
+            "journal" => {
+                parsed_entry.journal = element.value;
+            }
+            "year" => {
+                parsed_entry.year = parse_int_element(element);
+            }
+            "volume" => {
+                parsed_entry.volume = element.value;
+            }
+            "number" => {
+                parsed_entry.number = element.value;
+            }
+            "pages" => {
+                parsed_entry.pages = element.value;
+            }
+            "doi" => {
+                parsed_entry.doi = element.value;
+            }
+            "issn" => {
+                parsed_entry.issn = element.value;
+            }
+            "month" => {
+                parsed_entry.month = element.value;
+            }
+            "issue_date" => {
+                parsed_entry.issue_date = element.value;
+            }
+            "publisher" => {
+                parsed_entry.publisher = element.value;
+            }
+            "address" => {
+                parsed_entry.address = element.value;
+            }
+            "url" => {
+                parsed_entry.url = element.value;
+            }
+            "numpages" => {
+                parsed_entry.numpages = parse_int_element(element);
+            }
+            "articleno" => {
+                parsed_entry.numpages = parse_int_element(element);
+            }
+            "note" => {
+                parsed_entry.note = element.value;
+            }
+            "language" => {
+                parsed_entry.language = element.value;
+            }
+            "abbrev_source_title" => {
+                parsed_entry.abbrev_source_title = element.value;
+            }
+            "publication_stage" => {
+                parsed_entry.publication_stage = element.value;
+            }
+            "source" => {
+                parsed_entry.source = element.value;
+            }
+            "coden" => {
+                parsed_entry.coden = element.value;
+            }
+            "pmid" => {
+                parsed_entry.pmid = parse_int_element(element);
+            }
+            "type" => {
+                if element.value.to_lowercase() != category {
+                    log::warn!(
+                        "Entry category \"{category}\" differs from element type \"{}\"",
+                        element.value
+                    );
+                }
+            }
+            "}" | "" => {
+                break;
+            }
+            _ => {
+                log::warn!("Skipping unknown element: {}", element.key);
+            }
+        }
     }
-    return Entry {
-        category,
-        key,
-        elements,
-    };
+    parsed_entry
 }
 
 pub fn parse_file(file_path: PathBuf) {
     log::info!("Parsing {}...", file_path.display());
     let mut bib: File = File::open(file_path).unwrap();
     let mut raw_entry: Cursor<Vec<u8>> = next_entry(&mut bib);
-    let mut buffer: String = String::new();
-    raw_entry.read_to_string(&mut buffer).unwrap();
-    log::info!("Got first entry!");
-    parse_entry(&mut raw_entry);
-    //let entry: Entry = parse_entry(&mut raw_entry);
-    //log::info!("Got entry!");
-    //println!("{:?}", entry);
+
+    // TODO @arthurazs: loop until EOF
+    let entry: Entry = parse_entry(&mut raw_entry);
+    log::info!("Got entry!");
+    println!("{:?}", entry);
 }
 
 mod case_tests;
 #[cfg(test)]
 mod tests {
     use crate::case_tests::cases::{
-        CaseGetElementKey, CaseGetElementValue, CaseGetKey, CaseGetNextElement,
-        ExpectedGetCategory, ExpectedNextEntry,
+        CaseGetElementKey, CaseGetElementValue, CaseGetKey, CaseGetNextElement, CaseParseEntry, ExpectedGetCategory,
+        ExpectedNextEntry,
     };
     use crate::{
-        get_category, get_element_key, get_element_value, get_key, get_next_element, next_entry,
-        Element,
+        get_category, get_element_key, get_element_value, get_key, get_next_element, next_entry, parse_entry, Element,
     };
     use std::io::Cursor;
     use std::io::{Read, Seek, SeekFrom};
-    const EMPTY_CHARS: [u8; 4] = [b'\t', b'\n', b'\r', b' '];
+    const EMPTY_CHARS: [u8; 4] = *b"\t\n\r ";
 
     trait Teller {
         fn tell(&mut self) -> u64;
@@ -292,12 +449,12 @@ mod tests {
         }
     }
 
-    //#[test]
-    //fn parse_entry_cases() {
-    //    for mut case in CaseParseEntry::new() {
-    //        let entry = parse_entry(&mut case.entry);
-    //        assert_eq!(entry, case.expected);
-    //        assert_eq!(case.entry.tell(), case.expected.tell);
-    //    }
-    //}
+    #[test]
+    fn parse_entry_cases() {
+        for mut case in CaseParseEntry::new() {
+            let parsed_entry = parse_entry(&mut case.entry);
+            assert_eq!(parsed_entry, case.expected.parsed_entry);
+            assert_eq!(case.entry.tell(), case.expected.tell);
+        }
+    }
 }

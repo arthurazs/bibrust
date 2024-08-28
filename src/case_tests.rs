@@ -1,5 +1,8 @@
 #[cfg(test)]
 pub mod cases {
+    use std::io::Cursor;
+    use crate::Entry;
+
     const EXPECTED_CATEGORY: &str = "article";
     const EXPECTED_KEY: &str = "1";
     const ACM_TEXT: &str = r"
@@ -17,7 +20,7 @@ url = {https://doi.org/10.1007/s00165-019-00503-1},
 doi = {10.1007/s00165-019-00503-1},
 journal = {Form. Asp. Comput.},
 month = {feb},
-pages = {71–111},
+pages = {71-111},
 numpages = {41},
 keywords = {Theorem proving, Higher-order logic, Fault tree, Reliability block diagrams, Smart grid}
 }
@@ -140,7 +143,6 @@ EXPORT DATE: 02 July 2024
 }
 ";
 
-    use std::io::Cursor;
     pub struct ExpectedNextEntry {
         pub file: Cursor<String>,
         pub expected_entry1: Cursor<Vec<u8>>,
@@ -156,14 +158,14 @@ EXPORT DATE: 02 July 2024
         pub fn new() -> [Self; 4] {
             let acm = ExpectedNextEntry {
                 file: Cursor::new(String::from(ACM_TEXT)),
-                expected_entry1: Cursor::new(Vec::from(&ACM_TEXT[..623])),
-                expected_tell1: 623,
-                expected_entry2: Cursor::new(Vec::from(&ACM_TEXT[623..1133])),
-                expected_tell2: 1133,
-                expected_entry3: Cursor::new(Vec::from(&ACM_TEXT[1133..])),
-                expected_tell3: 1134,
-                expected_entry4: Cursor::new(Vec::from(&ACM_TEXT[1134..])),
-                expected_tell4: 1134,
+                expected_entry1: Cursor::new(Vec::from(&ACM_TEXT[..621])),
+                expected_tell1: 621,
+                expected_entry2: Cursor::new(Vec::from(&ACM_TEXT[621..1131])),
+                expected_tell2: 1131,
+                expected_entry3: Cursor::new(Vec::from(&ACM_TEXT[1131..])),
+                expected_tell3: 1132,
+                expected_entry4: Cursor::new(Vec::from(&ACM_TEXT[1132..])),
+                expected_tell4: 1132,
             };
 
             let ieee = ExpectedNextEntry {
@@ -214,7 +216,7 @@ EXPORT DATE: 02 July 2024
     impl ExpectedGetCategory {
         pub fn new() -> [Self; 4] {
             let acm = ExpectedGetCategory {
-                entry: Cursor::new(Vec::from(&ACM_TEXT[..623])),
+                entry: Cursor::new(Vec::from(&ACM_TEXT[..621])),
                 tell: 10,
                 category: EXPECTED_CATEGORY.to_string(),
             };
@@ -248,7 +250,7 @@ EXPORT DATE: 02 July 2024
     impl CaseGetKey {
         pub fn new() -> [Self; 4] {
             let acm = CaseGetKey {
-                entry: Cursor::new(Vec::from(&ACM_TEXT[..623])),
+                entry: Cursor::new(Vec::from(&ACM_TEXT[..621])),
                 expected: ExpectedValue {
                     value: EXPECTED_KEY.to_string(),
                     tell: 12,
@@ -286,7 +288,7 @@ EXPORT DATE: 02 July 2024
     impl CaseGetElementKey {
         pub fn new() -> [Self; 4] {
             let acm = CaseGetElementKey {
-                entry: Cursor::new(Vec::from(&ACM_TEXT[..623])),
+                entry: Cursor::new(Vec::from(&ACM_TEXT[..621])),
                 expected: ExpectedValue {
                     value: String::from("author"),
                     tell: 21,
@@ -324,7 +326,7 @@ EXPORT DATE: 02 July 2024
     impl CaseGetElementValue {
         pub fn new() -> [Self; 4] {
             let acm = CaseGetElementValue {
-                entry: Cursor::new(Vec::from(&ACM_TEXT[..623])),
+                entry: Cursor::new(Vec::from(&ACM_TEXT[..621])),
                 expected: ExpectedValue {
                     value: String::from(r"Ahmad, Waqar and Hasan, Osman and Tahar, Sofi\`{e}ne"),
                     tell: 76,
@@ -369,7 +371,7 @@ EXPORT DATE: 02 July 2024
     impl CaseGetNextElement {
         pub fn new() -> [Self; 4] {
             let acm = CaseGetNextElement {
-                entry: Cursor::new(Vec::from(&ACM_TEXT[..623])),
+                entry: Cursor::new(Vec::from(&ACM_TEXT[..621])),
                 expected: ExpectedElement {
                     key: String::from("author"),
                     value: String::from(r"Ahmad, Waqar and Hasan, Osman and Tahar, Sofi\`{e}ne"),
@@ -406,7 +408,7 @@ EXPORT DATE: 02 July 2024
         }
         pub fn new_twice() -> [Self; 4] {
             let acm = CaseGetNextElement {
-                entry: Cursor::new(Vec::from(&ACM_TEXT[..623])),
+                entry: Cursor::new(Vec::from(&ACM_TEXT[..621])),
                 expected: ExpectedElement {
                     key: String::from("title"),
                     value: String::from("Formal reliability and failure analysis of ethernet based communication networks in a smart grid substation"),
@@ -435,6 +437,168 @@ EXPORT DATE: 02 July 2024
                     key: String::from("title"),
                     value: String::from("An Integrated Testbed for Power System Cyber-Physical Operations Training"),
                     tell: 244,
+                },
+            };
+            [acm, ieee, science_directory, scopus]
+        }
+    }
+
+    pub struct ExpectedParsedEntry {
+        pub parsed_entry: Entry,
+        pub tell: u64,
+    }
+    pub struct CaseParseEntry {
+        pub entry: Cursor<Vec<u8>>,
+        pub expected: ExpectedParsedEntry,
+    }
+    impl CaseParseEntry {
+        pub fn new() -> [Self; 4] {
+            let acm = CaseParseEntry {
+                entry: Cursor::new(Vec::from(&ACM_TEXT[..621])),
+                expected: ExpectedParsedEntry {
+                    parsed_entry: Entry {
+                        category: String::from("article"),
+                        key: String::from("1"),
+                        author: Vec::<String>::new(),
+                        title: String::from("Formal reliability and failure analysis of ethernet based communication networks in a smart grid substation"),
+                        year: 2020,
+                        issue_date: String::from("Feb 2020"),
+                        publisher: String::from("Springer-Verlag"),
+                        address: String::from("Berlin, Heidelberg"),
+                        volume: String::from("32"),
+                        number:String::from("1"),
+                        issn: String::from("0934-5043"),
+                        url: String::from("https://doi.org/10.1007/s00165-019-00503-1"),
+                        doi: String::from("10.1007/s00165-019-00503-1"),
+                        journal: String::from("Form. Asp. Comput."),
+                        month: String::from("feb"),
+                        pages: String::from("71-111"),
+                        numpages: 41,
+                        keywords: Vec::<String>::new(),
+                        articleno: 0,
+                        note: String::from(""),
+                        affiliations: Vec::<String>::new(),
+                        author_keywords: Vec::<String>::new(),
+                        correspondence_address: Vec::<String>::new(),
+                        language: String::from(""),
+                        abbrev_source_title: String::from(""),
+                        publication_stage: String::from(""),
+                        source: String::from(""),
+                        coden: String::from(""),
+                        pmid: 0,
+                    },
+                    tell: 621,
+                },
+            };
+            let ieee = CaseParseEntry {
+                entry: Cursor::new(Vec::from(&IEEE_TEXT[..357])),
+                expected: ExpectedParsedEntry {
+                    parsed_entry: Entry {
+                        category: String::from("article"),
+                        key: String::from("1"),
+                        author: Vec::<String>::new(),
+                        journal: String::from("Journal of Modern Power Systems and Clean Energy"),
+                        title: String::from("Shared-network scheme of SMV and GOOSE in smart substation"),
+                        year: 2014,
+                        volume: String::from("2"),
+                        number:String::from("4"),
+                        pages: String::from("438-443"),
+                        doi: String::from("10.1007/s40565-014-0073-z"),
+                        issn: String::from("2196-5420"),
+                        month: String::from("December"),
+                        keywords: Vec::<String>::new(),
+                        issue_date: String::new(),
+                        publisher: String::new(),
+                        address: String::new(),
+                        url: String::new(),
+                        numpages: 0,
+                        articleno: 0,
+                        note: String::new(),
+                        affiliations: Vec::<String>::new(),
+                        author_keywords: Vec::<String>::new(),
+                        correspondence_address: Vec::<String>::new(),
+                        language: String::new(),
+                        abbrev_source_title: String::new(),
+                        publication_stage: String::new(),
+                        source: String::new(),
+                        coden: String::new(),
+                        pmid: 0,
+                    },
+                    tell: 357,
+                },
+            };
+            let science_directory = CaseParseEntry {
+                entry: Cursor::new(Vec::from(&SCI_DIR_TEXT[..542])),
+                expected: ExpectedParsedEntry {
+                    parsed_entry: Entry {
+                        category: String::from("article"),
+                        key: String::from("1"),
+                        title: String::from("Research and implementation of virtual circuit test tool for smart substations"),
+                        journal: String::from("Procedia Computer Science"),
+                        volume: String::from("183"),
+                        pages: String::from("197-204"),
+                        year: 2021,
+                        note: String::from("Proceedings of the 10th International Conference of Information and Communication Technology"),
+                        issn: String::from("1877-0509"),
+                        doi: String::from("https://doi.org/10.1016/j.procs.2021.02.050"),
+                        url: String::from("https://www.sciencedirect.com/science/article/pii/S1877050921005159"),
+                        author: Vec::<String>::new(),
+                        keywords: Vec::<String>::new(),
+                        number:String::new(),
+                        month: String::new(),
+                        issue_date: String::new(),
+                        publisher: String::new(),
+                        address: String::new(),
+                        numpages: 0,
+                        articleno: 0,
+                        affiliations: Vec::<String>::new(),
+                        author_keywords: Vec::<String>::new(),
+                        correspondence_address: Vec::<String>::new(),
+                        language: String::new(),
+                        abbrev_source_title: String::new(),
+                        publication_stage: String::new(),
+                        source: String::new(),
+                        coden: String::new(),
+                        pmid: 0,
+                    },
+                    tell: 542,
+                },
+            };
+            let scopus = CaseParseEntry {
+                entry: Cursor::new(Vec::from(&SCOPUS_TEXT[..1275])),
+                expected: ExpectedParsedEntry {
+                    parsed_entry: Entry {
+                        category: String::from("article"),
+                        key: String::from("1"),
+                        author: Vec::<String>::new(),
+                        title: String::from("An Integrated Testbed for Power System Cyber-Physical Operations Training"),
+                        year: 2023,
+                        journal: String::from("Applied Sciences (Switzerland)"),
+                        volume: String::from("13"),
+                        number:String::from("16"),
+                        doi: String::from("10.3390/app13169451"),
+                        url: String::from("https://www.scopus.com/inward/record.uri?eid=2-s2.0-85169099191&doi=10.3390%2fapp13169451&partnerID=40&md5=17b896c1c440787efcbc5d384003d31c"),
+                        affiliations: Vec::<String>::new(),
+                        author_keywords: Vec::<String>::new(),
+                        correspondence_address: Vec::<String>::new(),
+                        publisher: String::from("Multidisciplinary Digital Publishing Institute (MDPI)"),
+                        issn: String::from("20763417"),
+                        language: String::from("English"),
+                        abbrev_source_title: String::from("Appl. Sci."),
+                        publication_stage: String::from("Final"),
+                        source: String::from("Scopus"),
+                        note: String::from("Cited by: 3; All Open Access, Gold Open Access"),
+                        pages: String::new(),
+                        keywords: Vec::<String>::new(),
+                        month: String::new(),
+                        issue_date: String::new(),
+                        address: String::new(),
+                        numpages: 0,
+                        articleno: 0,
+                        coden: String::new(),
+                        pmid: 0,
+                    },
+                    tell: 1275,
                 },
             };
             [acm, ieee, science_directory, scopus]
