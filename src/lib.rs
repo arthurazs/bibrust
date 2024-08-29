@@ -317,6 +317,7 @@ mod tests {
     };
     use crate::{
         get_category, get_element_key, get_element_value, get_key, get_next_element, next_entry, parse_entry, Element,
+        parse_int_element,
     };
     use std::io::Cursor;
     use std::io::{Read, Seek, SeekFrom};
@@ -456,5 +457,23 @@ mod tests {
             assert_eq!(parsed_entry, case.expected.parsed_entry);
             assert_eq!(case.entry.tell(), case.expected.tell);
         }
+    }
+
+    #[test]
+    fn parse_int_positive() {
+        let element: Element = Element { key: String::from("w/e"), value: String::from("1") };
+        assert_eq!(1, parse_int_element(element));
+    }
+
+    #[test]
+    fn parse_int_negative() {
+        let element: Element = Element { key: String::from("w/e"), value: String::from("-1") };
+        assert_eq!(0, parse_int_element(element));
+    }
+
+    #[test]
+    fn parse_int_overflow() {
+        let element: Element = Element { key: String::from("w/e"), value: u32::MAX.to_string()  };
+        assert_eq!(0, parse_int_element(element));
     }
 }
