@@ -79,7 +79,7 @@ impl Entry {
     }
 }
 
-pub fn next_entry<R: Read>(bib: &mut R) -> Cursor<Vec<u8>> {
+fn next_entry<R: Read>(bib: &mut R) -> Cursor<Vec<u8>> {
     let mut buffer: [u8; 1] = [0; 1];
     let mut entry: Cursor<Vec<u8>> = Cursor::new(Vec::new());
     let mut found: bool = false;
@@ -105,7 +105,7 @@ pub fn next_entry<R: Read>(bib: &mut R) -> Cursor<Vec<u8>> {
     entry
 }
 
-pub fn get_category(entry: &mut Cursor<Vec<u8>>) -> String {
+fn get_category(entry: &mut Cursor<Vec<u8>>) -> String {
     let mut buffer: [u8; 1] = [0; 1];
     let mut category = String::new();
     let mut found_at = false;
@@ -122,7 +122,7 @@ pub fn get_category(entry: &mut Cursor<Vec<u8>>) -> String {
     category.to_lowercase()
 }
 
-pub fn get_key(entry: &mut Cursor<Vec<u8>>) -> String {
+fn get_key(entry: &mut Cursor<Vec<u8>>) -> String {
     let mut buffer: [u8; 1] = [0; 1];
     let mut key = String::new();
     while entry.read(&mut buffer).unwrap() != 0 {
@@ -178,7 +178,7 @@ fn get_element_value(entry: &mut Cursor<Vec<u8>>) -> String {
     element_key.trim().to_string()
 }
 
-pub fn get_next_element(entry: &mut Cursor<Vec<u8>>) -> Element {
+fn get_next_element(entry: &mut Cursor<Vec<u8>>) -> Element {
     Element {
         key: get_element_key(entry),
         value: get_element_value(entry),
