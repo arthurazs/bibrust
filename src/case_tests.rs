@@ -1,7 +1,7 @@
 #[cfg(test)]
 pub mod cases {
-    use std::io::Cursor;
     use crate::Entry;
+    use std::io::Cursor;
 
     const EXPECTED_CATEGORY: &str = "article";
     const EXPECTED_KEY: &str = "1";
@@ -107,7 +107,7 @@ EXPORT DATE: 02 July 2024
 	doi = {10.3390/app13169451},
 	url = {https://www.scopus.com/inward/record.uri?eid=2-s2.0-85169099191&doi=10.3390%2fapp13169451&partnerID=40&md5=17b896c1c440787efcbc5d384003d31c},
 	affiliations = {National Wind Institute, Texas Tech University, Lubbock, 79401, TX, United States; Electrical and Computer Engineering Department, Texas Tech University, Lubbock, 79401, TX, United States},
-	author_keywords = {cyberattacks; cyber–physical systems; education; power systems; real-time testbed; smart grids},
+	author_keywords = {cyberattacks; cyber-physical systems; education; power systems; real-time testbed; smart grids},
 	correspondence_address = {R. Bhatta; National Wind Institute, Texas Tech University, Lubbock, 79401, United States; email: rabindra.bhatta(at)ttu.edu},
 	publisher = {Multidisciplinary Digital Publishing Institute (MDPI)},
 	issn = {20763417},
@@ -194,14 +194,14 @@ EXPORT DATE: 02 July 2024
 
             let scopus = ExpectedNextEntry {
                 file: Cursor::new(String::from(SCOPUS_TEXT)),
-                expected_entry1: Cursor::new(Vec::<u8>::from(&SCOPUS_TEXT[..1275])),
-                expected_tell1: 1275,
-                expected_entry2: Cursor::new(Vec::<u8>::from(&SCOPUS_TEXT[1275..2942])),
-                expected_tell2: 2942,
-                expected_entry3: Cursor::new(Vec::<u8>::from(&SCOPUS_TEXT[2942..])),
-                expected_tell3: 2943,
-                expected_entry4: Cursor::new(Vec::<u8>::from(&SCOPUS_TEXT[2943..])),
-                expected_tell4: 2943,
+                expected_entry1: Cursor::new(Vec::<u8>::from(&SCOPUS_TEXT[..1273])),
+                expected_tell1: 1273,
+                expected_entry2: Cursor::new(Vec::<u8>::from(&SCOPUS_TEXT[1273..2940])),
+                expected_tell2: 2940,
+                expected_entry3: Cursor::new(Vec::<u8>::from(&SCOPUS_TEXT[2940..])),
+                expected_tell3: 2941,
+                expected_entry4: Cursor::new(Vec::<u8>::from(&SCOPUS_TEXT[2941..])),
+                expected_tell4: 2941,
             };
 
             [acm, ieee, science_directory, scopus]
@@ -435,7 +435,9 @@ EXPORT DATE: 02 July 2024
                 entry: Cursor::new(Vec::<u8>::from(&SCOPUS_TEXT[..1275])),
                 expected: ExpectedElement {
                     key: String::from("title"),
-                    value: String::from("An Integrated Testbed for Power System Cyber-Physical Operations Training"),
+                    value: String::from(
+                        "An Integrated Testbed for Power System Cyber-Physical Operations Training",
+                    ),
                     tell: 244,
                 },
             };
@@ -459,7 +461,7 @@ EXPORT DATE: 02 July 2024
                     parsed_entry: Entry {
                         category: String::from("article"),
                         key: String::from("1"),
-                        author: Vec::<String>::new(),
+                        author: vec!["Ahmad, Waqar".to_string(), "Hasan, Osman".to_string(), r"Tahar, Sofi\`{e}ne".to_string()],
                         title: String::from("Formal reliability and failure analysis of ethernet based communication networks in a smart grid substation"),
                         year: 2020,
                         issue_date: String::from("Feb 2020"),
@@ -473,8 +475,15 @@ EXPORT DATE: 02 July 2024
                         journal: String::from("Form. Asp. Comput."),
                         month: String::from("feb"),
                         pages: String::from("71-111"),
+                        r#abstract: String::new(),
                         numpages: 41,
-                        keywords: Vec::<String>::new(),
+                        keywords: vec![
+                            "Theorem proving".to_string(),
+                            "Higher-order logic".to_string(),
+                            "Fault tree".to_string(),
+                            "Reliability block diagrams".to_string(),
+                            "Smart grid".to_string(),
+                        ],
                         articleno: 0,
                         note: String::from(""),
                         affiliations: Vec::<String>::new(),
@@ -496,16 +505,24 @@ EXPORT DATE: 02 July 2024
                     parsed_entry: Entry {
                         category: String::from("article"),
                         key: String::from("1"),
-                        author: Vec::<String>::new(),
+                        author: vec![
+                            "Wang, Wenlong".to_string(),
+                            "Liu, Minghui".to_string(),
+                            "Zhao, Xicai".to_string(),
+                            "Yang, Gui".to_string(),
+                        ],
                         journal: String::from("Journal of Modern Power Systems and Clean Energy"),
-                        title: String::from("Shared-network scheme of SMV and GOOSE in smart substation"),
+                        title: String::from(
+                            "Shared-network scheme of SMV and GOOSE in smart substation",
+                        ),
                         year: 2014,
                         volume: String::from("2"),
-                        number:String::from("4"),
+                        number: String::from("4"),
                         pages: String::from("438-443"),
                         doi: String::from("10.1007/s40565-014-0073-z"),
                         issn: String::from("2196-5420"),
                         month: String::from("December"),
+                        r#abstract: String::new(),
                         keywords: Vec::<String>::new(),
                         issue_date: String::new(),
                         publisher: String::new(),
@@ -542,8 +559,13 @@ EXPORT DATE: 02 July 2024
                         issn: String::from("1877-0509"),
                         doi: String::from("https://doi.org/10.1016/j.procs.2021.02.050"),
                         url: String::from("https://www.sciencedirect.com/science/article/pii/S1877050921005159"),
-                        author: Vec::<String>::new(),
-                        keywords: Vec::<String>::new(),
+                        author: vec!["Jin Wang".to_string(), "Zengkai Wang".to_string()],
+                        keywords: vec![
+                            "Smart substation".to_string(),
+                            "IEC61850".to_string(),
+                            "virtual circuit".to_string(),
+                        ],
+                        r#abstract: String::new(),
                         number:String::new(),
                         month: String::new(),
                         issue_date: String::new(),
@@ -570,7 +592,13 @@ EXPORT DATE: 02 July 2024
                     parsed_entry: Entry {
                         category: String::from("article"),
                         key: String::from("1"),
-                        author: Vec::<String>::new(),
+                        author: vec![
+                            "Chamana, Manohar".to_string(),
+                            "Bhatta, Rabindra".to_string(),
+                            "Schmitt, Konrad".to_string(),
+                            "Shrestha, Rajendra".to_string(),
+                            "Bayne, Stephen".to_string(),
+                        ],
                         title: String::from("An Integrated Testbed for Power System Cyber-Physical Operations Training"),
                         year: 2023,
                         journal: String::from("Applied Sciences (Switzerland)"),
@@ -578,9 +606,23 @@ EXPORT DATE: 02 July 2024
                         number:String::from("16"),
                         doi: String::from("10.3390/app13169451"),
                         url: String::from("https://www.scopus.com/inward/record.uri?eid=2-s2.0-85169099191&doi=10.3390%2fapp13169451&partnerID=40&md5=17b896c1c440787efcbc5d384003d31c"),
-                        affiliations: Vec::<String>::new(),
-                        author_keywords: Vec::<String>::new(),
-                        correspondence_address: Vec::<String>::new(),
+                        affiliations: vec![
+                            "National Wind Institute, Texas Tech University, Lubbock, 79401, TX, United States".to_string(),
+                            "Electrical and Computer Engineering Department, Texas Tech University, Lubbock, 79401, TX, United States".to_string(),
+                        ],
+                        author_keywords: vec![
+                            "cyberattacks".to_string(),
+                            "cyber-physical systems".to_string(),
+                            "education".to_string(),
+                            "power systems".to_string(),
+                            "real-time testbed".to_string(),
+                            "smart grids".to_string(),
+                        ],
+                        correspondence_address: vec![
+                            "R. Bhatta".to_string(),
+                            "National Wind Institute, Texas Tech University, Lubbock, 79401, United States".to_string(),
+                            "email: rabindra.bhatta(at)ttu.edu".to_string(),
+                        ],
                         publisher: String::from("Multidisciplinary Digital Publishing Institute (MDPI)"),
                         issn: String::from("20763417"),
                         language: String::from("English"),
@@ -588,6 +630,7 @@ EXPORT DATE: 02 July 2024
                         publication_stage: String::from("Final"),
                         source: String::from("Scopus"),
                         note: String::from("Cited by: 3; All Open Access, Gold Open Access"),
+                        r#abstract: String::new(),
                         pages: String::new(),
                         keywords: Vec::<String>::new(),
                         month: String::new(),

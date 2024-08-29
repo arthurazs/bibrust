@@ -1,4 +1,6 @@
+use std::fmt::Display;
 use std::io::{Cursor, Read, Seek, SeekFrom, Write};
+use std::str::FromStr;
 use std::{fs::File, path::PathBuf};
 
 #[derive(Debug)]
@@ -12,7 +14,7 @@ pub struct Entry {
     pub category: String,
     pub key: String,
     pub author: Vec<String>,
-    //pub r#abstract: String,
+    pub r#abstract: String,
     pub title: String,
     pub journal: String,
     pub year: u16,
@@ -38,7 +40,7 @@ pub struct Entry {
     pub publication_stage: String,
     pub source: String,
     pub coden: String,
-    pub pmid: u16,
+    pub pmid: u32,
 }
 impl Entry {
     fn new(category: String, key: String) -> Entry {
@@ -46,7 +48,7 @@ impl Entry {
             category,
             key,
             author: Vec::<String>::new(),
-            //r#abstract: String::new(),
+            r#abstract: String::new(),
             title: String::new(),
             journal: String::new(),
             year: 0,
@@ -183,35 +185,72 @@ pub fn get_next_element(entry: &mut Cursor<Vec<u8>>) -> Element {
     }
 }
 
-fn parse_int_element(element: Element) -> u16 {
-    match element.value.parse::<u16>() {
+fn parse_int_element<T>(element: Element) -> T
+where
+    T: FromStr + From<u8>,
+    <T as FromStr>::Err: Display,
+{
+    match element.value.parse::<T>() {
         Ok(parsed) => parsed,
         Err(reason) => {
-            log::warn!("Could not parse invalid {} {} [{reason}]", element.key, element.value);
-            0
+            log::warn!(
+                "Could not parse invalid {} {} [{reason}]",
+                element.key,
+                element.value
+            );
+            T::from(0)
         }
     }
 }
 
-pub fn parse_entry(entry: &mut Cursor<Vec<u8>>) -> Entry {
+pub fn parse_entry(entry: &mut Cursor<Vec<u8>>) -> Result<Entry, String> {
     let category: String = get_category(entry);
+    if category.is_empty() {
+        return Err(format!("Could not find category in entry"));
+    }
     let key: String = get_key(entry);
     let mut parsed_entry = Entry::new(category.clone(), key);
     loop {
         let element: Element = get_next_element(entry);
-        if element.key == "}" || element.key == "" {
-            break;
-        }
-        // TODO @arthurazs: parse missing elements: abstract, author, keywords, affiliations,
-        // author_keywords, correspondence_address
         match element.key.as_str() {
-            "author" | "keywords" | "affiliations" | "author_keywords" | "correspondence_address" => {
-                //parsed_entry.author = element.value;
-                log::warn!("this type of parsing is not implemented yet...")
+            "author" => {
+                parsed_entry.author = element
+                    .value
+                    .split("and")
+                    .map(|s| s.trim().to_string())
+                    .collect();
             }
-            //"abstract" => {
-            //    parsed_entry.r#abstract = element.value;
-            //}
+            "keywords" => {
+                parsed_entry.keywords = element
+                    .value
+                    .split(",")
+                    .map(|s| s.trim().to_string())
+                    .collect();
+            }
+            "affiliations" => {
+                parsed_entry.affiliations = element
+                    .value
+                    .split(";")
+                    .map(|s| s.trim().to_string())
+                    .collect();
+            }
+            "author_keywords" => {
+                parsed_entry.author_keywords = element
+                    .value
+                    .split(";")
+                    .map(|s| s.trim().to_string())
+                    .collect();
+            }
+            "correspondence_address" => {
+                parsed_entry.correspondence_address = element
+                    .value
+                    .split(";")
+                    .map(|s| s.trim().to_string())
+                    .collect();
+            }
+            "abstract" => {
+                parsed_entry.r#abstract = element.value;
+            }
             "title" => {
                 parsed_entry.title = element.value;
             }
@@ -294,30 +333,37 @@ pub fn parse_entry(entry: &mut Cursor<Vec<u8>>) -> Entry {
             }
         }
     }
-    parsed_entry
+    Ok(parsed_entry)
 }
 
-pub fn parse_file(file_path: PathBuf) {
+pub fn parse_file(file_path: PathBuf) -> usize {
     log::info!("Parsing {}...", file_path.display());
     let mut bib: File = File::open(file_path).unwrap();
-    let mut raw_entry: Cursor<Vec<u8>> = next_entry(&mut bib);
+    let mut raw_entry: Cursor<Vec<u8>>;
+    let mut counter: usize = 0;
 
-    // TODO @arthurazs: loop until EOF
-    let entry: Entry = parse_entry(&mut raw_entry);
-    log::info!("Got entry!");
-    println!("{:?}", entry);
+    loop {
+        raw_entry = next_entry(&mut bib);
+        match parse_entry(&mut raw_entry) {
+            Ok(_) => counter += 1,
+            Err(_) => {
+                log::info!("Reached end of file, read {counter} entries...");
+                return counter;
+            }
+        }
+    }
 }
 
 mod case_tests;
 #[cfg(test)]
 mod tests {
     use crate::case_tests::cases::{
-        CaseGetElementKey, CaseGetElementValue, CaseGetKey, CaseGetNextElement, CaseParseEntry, ExpectedGetCategory,
-        ExpectedNextEntry,
+        CaseGetElementKey, CaseGetElementValue, CaseGetKey, CaseGetNextElement, CaseParseEntry,
+        ExpectedGetCategory, ExpectedNextEntry,
     };
     use crate::{
-        get_category, get_element_key, get_element_value, get_key, get_next_element, next_entry, parse_entry, Element,
-        parse_int_element,
+        get_category, get_element_key, get_element_value, get_key, get_next_element, next_entry,
+        parse_entry, parse_int_element, Element,
     };
     use std::io::Cursor;
     use std::io::{Read, Seek, SeekFrom};
@@ -454,26 +500,35 @@ mod tests {
     fn parse_entry_cases() {
         for mut case in CaseParseEntry::new() {
             let parsed_entry = parse_entry(&mut case.entry);
-            assert_eq!(parsed_entry, case.expected.parsed_entry);
+            assert_eq!(parsed_entry, Ok(case.expected.parsed_entry));
             assert_eq!(case.entry.tell(), case.expected.tell);
         }
     }
 
     #[test]
     fn parse_int_positive() {
-        let element: Element = Element { key: String::from("w/e"), value: String::from("1") };
-        assert_eq!(1, parse_int_element(element));
+        let element: Element = Element {
+            key: String::from("w/e"),
+            value: String::from("1"),
+        };
+        assert_eq!(1, parse_int_element::<u8>(element));
     }
 
     #[test]
     fn parse_int_negative() {
-        let element: Element = Element { key: String::from("w/e"), value: String::from("-1") };
-        assert_eq!(0, parse_int_element(element));
+        let element: Element = Element {
+            key: String::from("w/e"),
+            value: String::from("-1"),
+        };
+        assert_eq!(0, parse_int_element::<u8>(element));
     }
 
     #[test]
     fn parse_int_overflow() {
-        let element: Element = Element { key: String::from("w/e"), value: u32::MAX.to_string()  };
-        assert_eq!(0, parse_int_element(element));
+        let element: Element = Element {
+            key: String::from("w/e"),
+            value: u32::MAX.to_string(),
+        };
+        assert_eq!(0, parse_int_element::<u8>(element));
     }
 }
