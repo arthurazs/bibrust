@@ -1,5 +1,5 @@
 use std::fmt::Display;
-use std::io::{Cursor, Read, Seek, SeekFrom, Write};
+use std::io::{Cursor, Read, Seek, SeekFrom, Write, BufReader};
 use std::str::FromStr;
 use std::{fs::File, path::PathBuf};
 
@@ -338,12 +338,13 @@ pub fn parse_entry(entry: &mut Cursor<Vec<u8>>) -> Result<Entry, String> {
 
 pub fn parse_file(file_path: PathBuf) -> usize {
     log::info!("Parsing {}...", file_path.display());
-    let mut bib: File = File::open(file_path).unwrap();
+    let bib: File = File::open(file_path).unwrap();
+    let mut reader: BufReader<File> = BufReader::new(bib);
     let mut raw_entry: Cursor<Vec<u8>>;
     let mut counter: usize = 0;
 
     loop {
-        raw_entry = next_entry(&mut bib);
+        raw_entry = next_entry(&mut reader);
         match parse_entry(&mut raw_entry) {
             Ok(_) => counter += 1,
             Err(_) => {
